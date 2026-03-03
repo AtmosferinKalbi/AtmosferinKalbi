@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AtmosferinKalbi PRO | V 2.0</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
+        
+        :root {
+            --bg-gradient: linear-gradient(180deg, #60a5fa 0%, #1e40af 40%, #020617 100%);
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            min-height: 100vh; color: white; margin: 0;
+            overflow-x: hidden;
+        }
+
+        .text-outline {
+            text-shadow: 2px 4px 0px rgba(0, 0, 0, 0.35);
+        }
+
+        .data-font {
+            font-weight: 900;
+            letter-spacing: -0.05em;
+            font-feature-settings: "tnum";
+            line-height: 0.9;
+        }
+
+        .sidebar {
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(40px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-card { 
+            background: rgba(255, 255, 255, 0.08); 
+            backdrop-filter: blur(25px); 
+            border: 1px solid rgba(255, 255, 255, 0.15); 
+            border-radius: 2rem; 
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-5px);
+        }
+
+        .unit-label { font-size: 0.4em; opacity: 0.8; font-weight: 800; margin-left: 5px; }
+
+        .radar-container {
+            height: 500px;
+            border-radius: 2rem;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+    </style>
+</head>
+<body class="flex">
+
+    <aside class="sidebar w-20 lg:w-64 min-h-screen fixed left-0 top-0 z-50 flex flex-col items-center lg:items-start p-6 gap-10">
+        <div class="flex items-center gap-3 mb-10">
+            <div class="bg-white text-blue-600 p-2 rounded-xl shadow-white/20 shadow-lg">
+                <i data-lucide="cloud-lightning" class="w-6 h-6"></i>
+            </div>
+            <span class="hidden lg:block font-black text-xl italic tracking-tighter">ATMOSFER<span class="text-blue-400">PRO</span></span>
+        </div>
+
+        <nav class="flex flex-col gap-6 w-full">
+            <button onclick="getWeather('Istanbul')" class="flex items-center gap-4 p-3 hover:bg-white/10 rounded-2xl transition w-full group">
+                <i data-lucide="map-pin" class="w-5 h-5 text-blue-300"></i>
+                <span class="hidden lg:block font-bold text-sm">İstanbul</span>
+            </button>
+            <button onclick="getWeather('Ankara')" class="flex items-center gap-4 p-3 hover:bg-white/10 rounded-2xl transition w-full">
+                <i data-lucide="map-pin" class="w-5 h-5 text-blue-300"></i>
+                <span class="hidden lg:block font-bold text-sm">Ankara</span>
+            </button>
+            <button onclick="getWeather('Izmir')" class="flex items-center gap-4 p-3 hover:bg-white/10 rounded-2xl transition w-full">
+                <i data-lucide="map-pin" class="w-5 h-5 text-blue-300"></i>
+                <span class="hidden lg:block font-bold text-sm">İzmir</span>
+            </button>
+        </nav>
+
+        <div class="mt-auto w-full">
+            <div class="hidden lg:block p-4 glass-card text-[10px] font-black opacity-50 text-center uppercase tracking-widest">
+                Professional Edition <br> v2.0.4
+            </div>
+        </div>
+    </aside>
+
+    <main class="ml-20 lg:ml-64 w-full p-6 lg:p-12 space-y-10">
+        
+        <div class="flex flex-col lg:flex-row justify-between items-center gap-6">
+            <div class="text-center lg:text-left">
+                <h1 id="cityName" class="text-7xl lg:text-9xl font-black uppercase tracking-tighter text-outline leading-none">YÜKLENİYOR...</h1>
+                <div class="flex items-center gap-4 mt-4 opacity-70 justify-center lg:justify-start">
+                    <i data-lucide="calendar" class="w-4 h-4"></i>
+                    <p id="currentDate" class="font-bold text-xs uppercase tracking-[0.3em]"></p>
+                </div>
+            </div>
+            <div class="relative w-full lg:w-[400px]">
+                <input id="cityInput" type="text" placeholder="Şehir ara..." class="w-full bg-white/10 border border-white/20 rounded-full px-8 py-4 outline-none text-white font-bold uppercase tracking-widest focus:ring-2 focus:ring-white/30 shadow-2xl">
+                <button onclick="getWeather()" class="absolute right-2 top-2 bg-white text-blue-900 px-6 py-2 rounded-full text-[10px] font-black hover:bg-blue-100 transition-all">SORGULA</button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-4 gap-8">
+            
+            <div class="xl:col-span-3 glass-card p-10 relative overflow-hidden flex flex-col justify-between min-h-[500px]">
+                <div id="bgIcon" class="absolute -right-20 -bottom-20 opacity-[0.05] scale-[4]"></div>
+                
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center relative z-10">
+                    <div>
+                        <span id="temp" class="text-[12rem] lg:text-[16rem] data-font text-outline">--°</span>
+                        <p id="description" class="text-4xl lg:text-6xl font-light capitalize text-outline -mt-4 opacity-90 italic">...</p>
+                    </div>
+                    <div id="weatherIcon" class="scale-[3] lg:scale-[5] p-20"></div>
+                </div>
+
+                <div class="flex flex-wrap gap-8 lg:gap-16 border-t border-white/10 pt-8 relative z-10">
+                    <div class="pr-8 border-r border-white/10">
+                        <p class="text-[10px] font-black opacity-50 mb-2 uppercase tracking-widest">Gündüz</p>
+                        <p id="dayTemp" class="text-5xl data-font text-outline">--°</p>
+                    </div>
+                    <div class="pr-8 border-r border-white/10">
+                        <p class="text-[10px] font-black opacity-50 mb-2 uppercase tracking-widest">Gece</p>
+                        <p id="nightTemp" class="text-5xl data-font text-blue-200 text-outline">--°</p>
+                    </div>
+                    <div class="pr-8 border-r border-white/10">
+                        <p class="text-[10px] font-black opacity-50 mb-2 uppercase tracking-widest">Basınç</p>
+                        <p id="pressure" class="text-4xl data-font text-outline">--</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black opacity-50 mb-2 uppercase tracking-widest">Nem</p>
+                        <p id="humidity" class="text-4xl data-font text-outline">--<span class="unit-label text-xl">%</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="glass-card p-8 flex flex-col justify-center h-1/2">
+                    <div class="flex items-center gap-4 mb-4 text-blue-300">
+                        <i data-lucide="wind" class="w-8 h-8"></i>
+                        <span class="font-black text-xs tracking-widest uppercase">Rüzgar Hızı</span>
+                    </div>
+                    <p class="text-6xl data-font text-outline"><span id="windSpeed">--</span><span class="unit-label text-sm uppercase">km/s</span></p>
+                </div>
+                <div class="glass-card p-8 flex flex-col justify-center h-1/2">
+                    <div class="flex items-center gap-4 mb-4 text-blue-300">
+                        <i data-lucide="umbrella" class="w-8 h-8"></i>
+                        <span class="font-black text-xs tracking-widest uppercase">Yağış İhtimali</span>
+                    </div>
+                    <p class="text-6xl data-font text-outline"><span id="pop">--</span><span class="unit-label text-2xl">%</span></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 pb-20">
+            <div class="glass-card p-8">
+                <h3 class="text-xl font-black uppercase tracking-tighter mb-8 opacity-80">Gelecek 5 Gün</h3>
+                <div id="forecastContainer" class="space-y-4"></div>
+            </div>
+            <div class="glass-card p-4">
+                <h3 class="text-xl font-black uppercase tracking-tighter mb-6 ml-4 opacity-80">Canlı Radar</h3>
+                <div class="radar-container">
+                    <iframe id="windyIframe" src="" frameborder="0" class="w-full h-full"></iframe>
+                </div>
+            </div>
+        </div>
+    </main>
+
+<script>
+    const apiKey = "6d4c1f9be7237068a9dd323532bfa14d"; 
+    function getLucideIcon(main) {
+        const map = { 'Clear': 'sun', 'Clouds': 'cloud', 'Rain': 'cloud-rain', 'Thunderstorm': 'cloud-lightning', 'Snow': 'snowflake' };
+        return map[main] || 'cloud-sun';
+    }
+
+    async function getWeather(city = 'Istanbul') {
+        const target = document.getElementById('cityInput').value.trim() || city;
+        try {
+            const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${target}&appid=${apiKey}&units=metric&lang=tr`);
+            const data = await res.json();
+            if(data.cod != 200) return alert("Şehir bulunamadı!");
+
+            document.getElementById('cityName').innerText = data.name;
+            document.getElementById('temp').innerText = Math.round(data.main.temp) + "°";
+            document.getElementById('description').innerText = data.weather[0].description;
+            document.getElementById('windSpeed').innerText = Math.round(data.wind.speed * 3.6);
+            document.getElementById('humidity').innerText = data.main.humidity;
+            document.getElementById('pressure').innerText = data.main.pressure;
+
+            const iconName = getLucideIcon(data.weather[0].main);
+            document.getElementById('weatherIcon').innerHTML = `<i data-lucide="${iconName}" class="w-full h-full text-white drop-shadow-2xl"></i>`;
+            document.getElementById('bgIcon').innerHTML = `<i data-lucide="${iconName}" class="w-full h-full text-white"></i>`;
+
+            document.getElementById('windyIframe').src = `https://embed.windy.com/embed2.html?lat=${data.coord.lat}&lon=${data.coord.lon}&zoom=6&overlay=rain&product=ecmwf&metricWind=km%2Fh&metricTemp=%C2%B0C`;
+
+            const fRes = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${target}&appid=${apiKey}&units=metric&lang=tr`);
+            const fData = await fRes.json();
+            document.getElementById('pop').innerText = Math.round((fData.list[0].pop || 0) * 100);
+
+            const daily = {};
+            fData.list.forEach(i => {
+                const d = i.dt_txt.split(' ')[0];
+                if(!daily[d]) daily[d] = { max: [], min: [], icon: i.weather[0].main };
+                daily[d].max.push(i.main.temp_max);
+                daily[d].min.push(i.main.temp_min);
+            });
+
+            document.getElementById('dayTemp').innerText = Math.round(Math.max(...daily[Object.keys(daily)[0]].max)) + "°";
+            document.getElementById('nightTemp').innerText = Math.round(Math.min(...daily[Object.keys(daily)[0]].min)) + "°";
+
+            const container = document.getElementById('forecastContainer');
+            container.innerHTML = "";
+            Object.keys(daily).slice(1, 6).forEach(d => {
+                const name = new Date(d).toLocaleDateString('tr-TR', { weekday: 'long' });
+                container.innerHTML += `
+                    <div class="flex items-center justify-between p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition">
+                        <span class="font-bold text-sm w-24">${name}</span>
+                        <i data-lucide="${getLucideIcon(daily[d].icon)}" class="text-blue-300 w-6 h-6"></i>
+                        <span class="data-font text-2xl w-12 text-right">${Math.round(Math.max(...daily[d].max))}°</span>
+                    </div>`;
+            });
+            lucide.createIcons();
+        } catch (e) { console.error(e); }
+    }
+
+    document.getElementById('cityInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') getWeather(); });
+    window.onload = () => { 
+        getWeather(); 
+        document.getElementById('currentDate').innerText = new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+    };
+</script>
+</body>
+</html>
+
